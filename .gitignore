@@ -1,18 +1,25 @@
 # Python
+venv/
 __pycache__/
 *.pyc
+venv-wsl
 
-# Virtual environments
-venv/
-venv-wsl/
-spark-env/
-
-# Delta tables / data
+# Local data
 data/
 
-# OS files
-.DS_Store
-Thumbs.db
+# AWS CLI install artifacts
+aws/
+awscliv2.zip
 
-# Kafka logs (if any)
+# AWS credentials
+.aws/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
 *.log

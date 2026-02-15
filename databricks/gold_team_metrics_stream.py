@@ -1,30 +1,34 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, sum, when, countDistinct
+from pyspark.sql.functions import col, sum, when
 
 spark = (
     SparkSession.builder
     .appName("GoldTeamMetrics")
     .master("local[*]")
+
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    .config(
+        "spark.hadoop.fs.s3a.aws.credentials.provider",
+        "com.amazonaws.auth.DefaultAWSCredentialsProviderChain"
+    )
+
     .getOrCreate()
 )
 
 spark.sparkContext.setLogLevel("WARN")
 
-# ----------------------------
-# Read Silver Stream
-# ----------------------------
+SILVER_PATH = "s3a://soccer-realtime-pipeline-lake-lacayo/silver"
+GOLD_PATH = "s3a://soccer-realtime-pipeline-lake-lacayo/gold/team_metrics"
+CHECKPOINT_PATH = "s3a://soccer-realtime-pipeline-lake-lacayo/checkpoints/gold_team_metrics"
 
 silver_stream = (
     spark.readStream
     .format("delta")
-    .load("data/silver")
+    .load(SILVER_PATH)
 )
-
-# ----------------------------
-# Team Metrics Aggregation
-# ----------------------------
 
 team_metrics = (
     silver_stream
@@ -39,19 +43,14 @@ team_metrics = (
     )
 )
 
-
-# ----------------------------
-# Write Gold Table
-# ----------------------------
-
 query = (
     team_metrics.writeStream
     .format("delta")
     .outputMode("complete")
-    .option("checkpointLocation", "data/checkpoints/gold_team_metrics")
-    .start("data/gold/team_metrics")
+    .option("checkpointLocation", CHECKPOINT_PATH)
+    .start(GOLD_PATH)
 )
 
-print("Gold team metrics streaming started")
+print("Gold team metrics streaming started → S3")
 
 query.awaitTermination()

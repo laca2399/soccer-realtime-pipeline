@@ -3,22 +3,47 @@ from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import *
 
 # ----------------------------
-# Spark Session (Delta enabled)
+# Spark Session (Delta + S3 enabled)
 # ----------------------------
 
 spark = (
     SparkSession.builder
     .appName("SoccerKafkaStreaming")
     .master("local[*]")
+
+    # Delta Lake
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+
+    # S3A configuration
+    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    .config(
+        "spark.hadoop.fs.s3a.aws.credentials.provider",
+        "com.amazonaws.auth.DefaultAWSCredentialsProviderChain"
+    )
+
     .getOrCreate()
 )
 
 spark.sparkContext.setLogLevel("WARN")
 
+# ----------------------------
+# Kafka config
+# ----------------------------
+
 KAFKA_BOOTSTRAP = "localhost:9092"
 TOPIC = "soccer_events"
+
+# ----------------------------
+# S3 paths
+# ----------------------------
+
+BRONZE_PATH = "s3a://soccer-realtime-pipeline-lake-lacayo/bronze"
+CHECKPOINT_PATH = "s3a://soccer-realtime-pipeline-lake-lacayo/checkpoints/bronze"
+
+# ----------------------------
+# Event schema
+# ----------------------------
 
 schema = StructType([
     StructField("event_id", StringType()),
@@ -34,6 +59,10 @@ schema = StructType([
     StructField("event_time", StringType()),
     StructField("ingestion_time", StringType())
 ])
+
+# ----------------------------
+# Kafka stream
+# ----------------------------
 
 raw_stream = (
     spark.readStream
@@ -51,15 +80,19 @@ parsed_stream = (
     .select("data.*")
 )
 
+# ----------------------------
+# Write Bronze Delta to S3
+# ----------------------------
+
 query = (
     parsed_stream.writeStream
     .format("delta")
     .outputMode("append")
-    .option("checkpointLocation", "data/checkpoints/bronze")
-    .start("data/bronze")
+    .option("checkpointLocation", CHECKPOINT_PATH)
+    .start(BRONZE_PATH)
 )
 
-print("Streaming started → Bronze Delta table")
+print("Streaming started → Bronze Delta table on S3")
 
 query.awaitTermination()
 
