@@ -71,6 +71,7 @@ Responsibilities:
 
 Example Event Structure
 
+```
 {
   event_id
   match_id
@@ -85,6 +86,7 @@ Example Event Structure
   event_time
   ingestion_time
 }
+```
 
 # Phase 2 — Bronze Streaming Layer (Raw Data)
 
@@ -94,11 +96,13 @@ The Bronze layer ingests raw streaming events directly from Kafka and stores the
 
 Task Flow
 
+```
 Kafka Topic
      ↓
 Spark Structured Streaming
      ↓
 Bronze Delta Table (S3)
+```
 
 Responsibilities
 
@@ -121,11 +125,13 @@ The Silver layer performs data cleansing and transformation on Bronze data.
 
 Task Flow
 
+```
 Bronze Delta Stream
       ↓
 Data Cleaning
       ↓
 Silver Delta Table
+```
 
 Responsibilities
 
@@ -155,38 +161,19 @@ The Gold layer builds streaming aggregations that power analytics use cases.
 
 Task Flow
 
+```
 Silver Stream
      ↓
 Streaming Aggregations
      ↓
 Gold Analytics Tables
+```
 
 Generated Tables
 
-match_stats
-
-match_id
-team
-goals
-
-team_metrics
-
-team
-goals
-shots
-fouls
-yellow_cards
-red_cards
-total_xg
-
-player_metrics
-
-player
-team
-goals
-shots
-cards
-total_xg
+- match_stats: 
+- team_metrics
+- player_metrics
 
 Purpose
 
@@ -202,12 +189,14 @@ Data Lake Layout
 
 s3://soccer-realtime-pipeline-lake/
 
+```
 bronze/
 silver/
 gold/
    ├── match_stats
    ├── team_metrics
    └── player_metrics
+```
 
 Responsibilities
 
@@ -223,11 +212,13 @@ Gold analytics tables are loaded into PostgreSQL for query performance.
 
 Task Flow
 
+```
 Delta Gold Tables
       ↓
 Spark JDBC
       ↓
 PostgreSQL Analytics Tables
+```
 
 Responsibilities
 
@@ -237,10 +228,12 @@ Responsibilities
 
 Example Query
 
+```
 SELECT player, goals
 FROM player_metrics
 ORDER BY goals DESC
 LIMIT 10;
+```
 
 # Phase 7 — CI/CD Validation
 
@@ -250,6 +243,7 @@ Workflow: .github/workflows/pipeline.yml
 
 Validation Steps
 
+```
 Repository Checkout
         ↓
 Python Setup
@@ -261,6 +255,7 @@ Code Linting (flake8)
 Python Script Validation
         ↓
 Project Structure Checks
+```
 
 Purpose
 
@@ -269,6 +264,7 @@ Purpose
 - Ensure pipeline integrity
 
 ## Medallion Data Lake Architecture
+```
         Kafka Events
              │
              ▼
@@ -286,6 +282,7 @@ Purpose
              ▼
         PostgreSQL
         Analytics DB
+```
 
 ## Engineering Challenges Solved
 
@@ -300,19 +297,13 @@ Purpose
 ## Results
 
 - Fully functional real-time streaming data platform
-
 - End-to-end Kafka → Spark → Data Lake architecture
-
 - Cloud-integrated Delta Lake storage
-
 - Analytics-ready PostgreSQL tables
-
 - Automated CI validation pipeline
-
 - Production-style data engineering project
 
 ## Author
 
 Andres Lacayo
-
 Data Engineering Portfolio Project
