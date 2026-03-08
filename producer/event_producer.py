@@ -42,6 +42,7 @@ SELECT
     league_id
 FROM Match
 WHERE season IS NOT NULL
+ORDER BY RANDOM()
 LIMIT 2000
 """, conn)
 
