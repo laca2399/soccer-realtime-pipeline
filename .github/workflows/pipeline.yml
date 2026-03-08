@@ -1,0 +1,49 @@
+name: Soccer Pipeline CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Install lint tools
+      run: |
+        pip install flake8
+
+    - name: Lint Python code
+      run: |
+        flake8 producer databricks sql --max-line-length=120
+
+    - name: Validate Python scripts
+      run: |
+        python -m py_compile producer/event_producer.py
+        python -m py_compile databricks/local_spark_stream.py
+        python -m py_compile databricks/silver_stream.py
+        python -m py_compile databricks/gold_team_metrics_stream.py
+        python -m py_compile databricks/gold_player_metrics_stream.py
+
+    - name: Verify project structure
+      run: |
+        test -d producer
+        test -d databricks
+        test -d kafka
+        test -d sql
