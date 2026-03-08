@@ -305,16 +305,22 @@ Purpose
 
 ## Project Screenshots
 
+# Event Producer 
 ![Event Producer](architecturepng/event_producer.png)
 
+# Streaming Started
 ![Streaming Started](architecturepng/streaming_started.png)
 
+# AWS S3 Architecture
 ![AWS S3](architecturepng/aws_folders.png)
 
+# Checkpoints
 ![Checkpoints](architecturepng/checkpoints.png)
 
+# Gold Tables
 ![Gold Tables](architecturepng/gold_tables.png)
 
+# CI/CD
 ![CI/CD](architecturepng/cicd.png)
 
 ## Author
