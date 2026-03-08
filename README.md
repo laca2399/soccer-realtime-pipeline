@@ -303,6 +303,20 @@ Purpose
 - Automated CI validation pipeline
 - Production-style data engineering project
 
+## Project Screenshots
+
+![Event Producer](architecturepng/event_producer.png)
+
+![Streaming Started](architecturepng/streaming_started.png)
+
+![AWS S3](architecturepng/aws_folders.png)
+
+![Checkpoints](architecturepng/checkpoints.png)
+
+![Gold Tables](architecturepng/gold_tables.png)
+
+![CI/CD](architecturepng/cicd.png)
+
 ## Author
 
 Andres Lacayo  
